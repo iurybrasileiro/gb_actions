@@ -9,6 +9,8 @@ jobs:
   deploy:
     name: Build and run tests
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     environment: DEV
 
     steps:
