@@ -93,10 +93,8 @@ jobs:
               body: comment
             });
 
-            console.log('Review data:', review.data);
-
             // Output the review ID
-            core.setOutput("review_id", review.data.id);
+            core.setOutput("comment_id", review.data.id);
 
 
       - name: Add comment ID to build success hook file
