@@ -10,6 +10,9 @@ jobs:
     name: Build and run tests
     runs-on: ubuntu-latest
     environment: DEV
+    permissions:
+      pull-requests: write
+      contents: read 
 
     steps:
       - uses: actions/checkout@v3
@@ -87,12 +90,13 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: pull_number,
-              event: 'COMMENT',
+              event: 'REQUEST_CHANGES',
               body: comment
             });
 
-            // Output the comment ID
-            core.setOutput("comment_id", review.data.id);
+            // Output the review ID
+            core.setOutput("review_id", review.data.id);
+
 
       - name: Add comment ID to build success hook file
         run: sed -i "3s/^/COMMENT_ID=${{ steps.create_review_comment.outputs.comment_id }}\n/" scripts/eas-build-on-success.sh
