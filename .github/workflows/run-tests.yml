@@ -93,6 +93,8 @@ jobs:
               body: comment
             });
 
+            console.log('Review data:', review.data);
+
             // Output the review ID
             core.setOutput("review_id", review.data.id);
 
