@@ -20,7 +20,7 @@ jobs:
         id: check_comment
         run: |
           COMMENTS_URL="https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
-          COMMENTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_MAESTRO_PAT }}" $COMMENTS_URL)
+          COMMENTS=$(curl -s -H "Authorization: Bearer ${{ secrets.MAESTRO_PAT }}" $COMMENTS_URL)
 
           echo "Fetched comments: $COMMENTS"
 
@@ -40,7 +40,7 @@ jobs:
             echo "comment_id=$COMMENT_ID" >> $GITHUB_ENV
             
             REPLIES_URL="https://api.github.com/repos/${{ github.repository }}/issues/comments/$COMMENT_ID/reactions"
-            REPLIES=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_MAESTRO_PAT }}" $REPLIES_URL)
+            REPLIES=$(curl -s -H "Authorization: Bearer ${{ secrets.MAESTRO_PAT }}" $REPLIES_URL)
             
             # Ensure replies exist
             if [[ -z "$(echo "$REPLIES" | jq '. | length')" || "$(echo "$REPLIES" | jq '. | length')" -eq 0 ]]; then
@@ -79,7 +79,7 @@ jobs:
         run: |
           COMMENT_RESPONSE=$(curl -s -L \
             -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_MAESTRO_PAT }}" \
+            -H "Authorization: Bearer ${{ secrets.MAESTRO_PAT }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
             --data-raw "{\"body\":\"Running e2e test\"}")
