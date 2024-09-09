@@ -82,8 +82,8 @@ jobs:
             const pull_number = context.issue.number;
             const comment = "Running e2e test";
 
-            // Post the review comment
-            const review = await github.pulls.createReview({
+            // Post the review comment using the GitHub client API
+            const review = await github.rest.pulls.createReview({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: pull_number,
