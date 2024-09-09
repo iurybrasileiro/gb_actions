@@ -21,6 +21,13 @@ jobs:
         run: |
           COMMENTS_URL="https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
           COMMENTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_MAESTRO_PAT }}" $COMMENTS_URL)
+
+          echo "Fetched comments: $COMMENTS"
+
+          if [[ -z "$COMMENTS" || "$COMMENTS" == "null" ]]; then
+            echo "No comments found or invalid response from API."
+            exit 1
+          fi
           
           # Look for 'Running e2e test' comment
           RUNNING_COMMENT=$(echo "$COMMENTS" | jq '.[] | select(.body | contains("Running e2e test"))')
