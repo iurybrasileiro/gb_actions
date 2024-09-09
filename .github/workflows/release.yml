@@ -1,0 +1,72 @@
+name: Generate and Deploy Release Notes
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate_release_notes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.7
+        with:
+          versionSpec: '5.x'
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Determine Version
+        id: git_version
+        run: |
+          echo "release_version=$(dotnet-gitversion /nonormalize /output json /showvariable MajorMinorPatch)" >> $GITHUB_OUTPUT
+      
+      - name: Get tag version
+        id: get_tag_version
+        run: |
+          echo "tag_version=v${{ steps.git_version.outputs.release_version }}" >> $GITHUB_OUTPUT
+
+      - name: Generate release tag
+        uses: rickstaa/action-create-tag@v1
+        id: "tag_create"
+        with:
+          tag: ${{ steps.get_tag_version.outputs.tag_version }}
+          message: ${{ steps.get_tag_version.outputs.tag_version }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release note
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.get_tag_version.outputs.tag_version }}
+          generateReleaseNotes: true
+          makeLatest: true
+
+      - name: Update package.json version
+        uses: jossef/action-set-json-field@v2.1
+        with:
+          file: package.json
+          field: version
+          value: ${{ steps.git_version.outputs.release_version }}
+
+      - name: Commit updated version
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Update version to ${{ steps.git_version.outputs.release_version }}
+      
+      # - name: Set execute permission for the script
+      #   run: chmod +x ./get_pull_request_title_from_release_notes.sh
+
+      # - name: Get pull requests title from last release note
+      #   id: get_pull_requests_title
+      #   run: |
+      #     pull_requests_title=$(./get_pull_request_title_from_release_notes.sh iurybrasileiro gb_actions_playground ${{ steps.get_tag_version.outputs.tag_version }} ${{ secrets.GITHUB_TOKEN }})
+      #     echo "pull_requests_title=$pull_requests_title" >> $GITHUB_OUTPUT
+      #     echo $pull_requests_title

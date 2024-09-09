@@ -1,0 +1,84 @@
+name: Create release candidate
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create_release_candidate_branch:
+    name: Calculate version
+    runs-on: ubuntu-latest
+    environment: DEV
+    steps:
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.7
+        with:
+          versionSpec: '5.x'
+
+      - uses: actions/checkout@v3
+        with:
+          ref: development
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-dotnet@v2
+
+      - name: Determine version
+        id: gitversion
+        run: |
+          echo "releaseVersion=$(dotnet-gitversion /nonormalize /output json /showvariable MajorMinorPatch)" >> $GITHUB_OUTPUT
+
+      - name: Get branch name
+        id: getBranchName
+        run: |
+          echo "branchName=release-candidate/${{ steps.gitversion.outputs.releaseVersion }}" >> $GITHUB_OUTPUT
+
+      - name: Configure Git user
+        run: |
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          git config --global user.name "${{ github.actor }}"
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh
+
+      - name: Create release candidate branch
+        run: |
+          git fetch
+          git pull
+          git checkout -b ${{ steps.getBranchName.outputs.branchName }}
+          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}.git/
+          git push origin ${{ steps.getBranchName.outputs.branchName }}
+
+      - name: Trigger create release workflow
+        uses: convictional/trigger-workflow-and-wait@v1.6.1
+        with:
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow_file_name: create-release.yml
+          ref: ${{ steps.getBranchName.outputs.branchName }}
+          client_payload: '{ "branch_name": "${{ steps.getBranchName.outputs.branchName }}" }'
+          propagate_failure: true
+          trigger_workflow: true
+          wait_workflow: true
+
+      - name: Update development
+        run: |
+          git checkout ${{ steps.getBranchName.outputs.branchName }}
+          git pull origin ${{ steps.getBranchName.outputs.branchName }}
+          git checkout development
+          git pull origin development
+          git rebase ${{ steps.getBranchName.outputs.branchName }}
+          git push origin development
+
+      - name: Trigger deploy release candidate workflow
+        uses: convictional/trigger-workflow-and-wait@v1.6.1
+        with:
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow_file_name: deploy-release-candidate.yml
+          ref: ${{ steps.getBranchName.outputs.branchName }}
+          client_payload: '{ "branch_name": "${{ steps.getBranchName.outputs.branchName }}" }'
+          propagate_failure: false
+          trigger_workflow: true
+          wait_workflow: false
