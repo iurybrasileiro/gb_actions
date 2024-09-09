@@ -74,43 +74,51 @@ jobs:
         if: github.event_name == 'pull_request'
         run: sed -i "2s/^/GB_PR_NUMBER=${{ github.event.number }}\n/" scripts/eas-build-on-success.sh
 
-      - name: Create 'Running e2e test' comment
-        id: create_comment
+      - name: Create 'Running e2e test' review comment
+        id: create_review_comment
         run: |
-          # Make the POST request to create the comment
-          COMMENT_RESPONSE=$(curl -s -w "%{http_code}" -o response.json \
+          # Define variables
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          REPO="${{ github.repository }}"
+          REVIEW_URL="https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}/reviews"
+          
+          # Create a review
+          REVIEW_RESPONSE=$(curl -s -w "%{http_code}" -o response.json \
             -X POST \
             -H "Authorization: Bearer ${{ secrets.MAESTRO_PAT }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
-            --data-raw "{\"body\":\"Running e2e test\"}")
-          
+            -H "Accept: application/vnd.github.v3+json" \
+            $REVIEW_URL \
+            --data-raw '{
+              "event": "COMMENT",
+              "body": "Running e2e test"
+            }')
+
           # Output the HTTP response code and body
-          HTTP_CODE=$(tail -n 1 <<< "$COMMENT_RESPONSE")
+          HTTP_CODE=$(tail -n 1 <<< "$REVIEW_RESPONSE")
           RESPONSE_BODY=$(cat response.json)
           
           echo "HTTP Response Code: $HTTP_CODE"
-          echo "Comment response body: $RESPONSE_BODY"
+          echo "Review response body: $RESPONSE_BODY"
           
           # Check if the HTTP code indicates success (200-299)
           if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
-            echo "Failed to create comment. HTTP status code: $HTTP_CODE"
+            echo "Failed to create review comment. HTTP status code: $HTTP_CODE"
             echo "Response body: $RESPONSE_BODY"
             exit 1
           fi
           
-          # Extract the comment ID using jq
-          COMMENT_ID=$(echo "$RESPONSE_BODY" | jq -r '.id')
+          # Extract the review ID from the response
+          REVIEW_ID=$(echo "$RESPONSE_BODY" | jq -r '.id')
 
-          # Check if the comment ID was successfully extracted
-          if [[ -z "$COMMENT_ID" ]]; then
-            echo "Failed to extract comment ID from response."
+          # Check if the review ID was successfully extracted
+          if [[ -z "$REVIEW_ID" ]]; then
+            echo "Failed to extract review ID from response."
             exit 1
           fi
           
-          # Save the comment ID as an environment variable for further steps
-          echo "comment_id=$COMMENT_ID" >> $GITHUB_ENV
-          echo "Created comment with ID: $COMMENT_ID"
+          # Save the review ID as an environment variable for further steps
+          echo "review_id=$REVIEW_ID" >> $GITHUB_ENV
+          echo "Created review comment with ID: $REVIEW_ID"
 
       - name: Add comment ID to build success hook file
         run: sed -i "3s/^/COMMENT_ID=${{ steps.create_comment.outputs.comment_id }}\n/" scripts/eas-build-on-success.sh
