@@ -24,14 +24,34 @@ jobs:
         with:
           script: |
             const pull_number = context.issue.number;
-            const comment = "Running e2e test";
+            const commentBody = "Running e2e test";
 
             // Post the review comment using the GitHub client API
             const comments = await github.rest.pulls.listReviews({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: pull_number,
+              per_page: 100,
             })
+
+            const sortedComments = comments.data.sort((a, b) => {
+              return new Date(b.submitted_at) - new Date(a.submitted_at);
+            });
+            
+            const hasRunningTestComment = sortedComments.find(comment => comment.body == commentBody)
+
+            if (hasRunningTestComment) {
+              const replies = await octokit.rest.pulls.listCommentsForReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pull_number,
+                review_id: hasRunningTestComment.id,
+              });
+
+              console.log(replies)
+
+              return
+            }
 
             console.log(comments)
           
