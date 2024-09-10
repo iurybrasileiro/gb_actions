@@ -27,7 +27,7 @@ jobs:
             const comment = "Running e2e test";
 
             // Post the review comment using the GitHub client API
-            const comments = await github.rest.pulls.listReviewComments({
+            const comments = await github.rest.pulls.listReviews({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: pull_number,
