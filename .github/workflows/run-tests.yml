@@ -26,7 +26,6 @@ jobs:
             const pull_number = context.issue.number;
             const commentBody = "Running e2e test";
 
-            // Post the review comment using the GitHub client API
             const comments = await github.rest.pulls.listReviews({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -37,23 +36,41 @@ jobs:
             const sortedComments = comments.data.sort((a, b) => {
               return new Date(b.submitted_at) - new Date(a.submitted_at);
             });
-            
+
             const hasRunningTestComment = sortedComments.find(comment => comment.body == commentBody)
 
             if (hasRunningTestComment) {
-              const replies = await github.rest.pulls.listCommentsForReview({
+              const repliesResponse = await github.rest.pulls.listCommentsForReview({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: pull_number,
                 review_id: hasRunningTestComment.id,
               });
 
-              console.log(replies)
+              const replies = repliesResponse.data;
 
-              return
+              if (replies.length < 2) {
+                core.setFailed('No replies related to ');
+              }
+
+              const androidComment = replies.find(reply => reply.body.contains("ANDROID"))
+              const iosComment = replies.find(reply => reply.body.contains("IOS"))
+
+              if (!androidComment || !iosComment) {
+                core.setFailed('Android or iOS not found');
+              }
+
+              const isAllTestsPassed = replies.every(reply => reply.body.contains('PASSED'))
+
+              if (isAllTestsPassed) {
+                console.log('Both Android and iOS tests passed');
+                return
+              }
+
+              core.setFailed('One or both tests failed for Android or iOS');
             }
 
-            console.log(comments)
+            console.log("No Running e2e test comment found")
           
  
       - name: Add PR number in build success hook file
