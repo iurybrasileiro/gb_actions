@@ -41,7 +41,7 @@ jobs:
             const hasRunningTestComment = sortedComments.find(comment => comment.body == commentBody)
 
             if (hasRunningTestComment) {
-              const replies = await octokit.rest.pulls.listCommentsForReview({
+              const replies = await github.rest.pulls.listCommentsForReview({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: pull_number,
