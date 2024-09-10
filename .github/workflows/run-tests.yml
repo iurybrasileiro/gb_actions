@@ -27,16 +27,13 @@ jobs:
             const comment = "Running e2e test";
 
             // Post the review comment using the GitHub client API
-            const review = await github.rest.pulls.createReview({
+            const issue = await github.rest.issues.get({
+              issue_number: pull_number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: pull_number,
-              event: 'REQUEST_CHANGES',
-              body: comment
-            });
+            })
 
-            // Output the review ID
-            core.setOutput("comment_id", review.data.id);
+            console.log(issue)
           
  
       - name: Add PR number in build success hook file
@@ -52,13 +49,17 @@ jobs:
             const comment = "Running e2e test";
 
             // Post the review comment using the GitHub client API
-            const comments = await github.rest.issues.listComments({
+            const review = await github.rest.pulls.createReview({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue: pull_number,
+              pull_number: pull_number,
+              event: 'REQUEST_CHANGES',
+              body: comment
             });
 
-            console.log(comments)
+            // Output the review ID
+            core.setOutput("comment_id", review.data.id);
+
 
       - name: Add comment ID to build success hook file
         run: sed -i "3s/^/COMMENT_ID=${{ steps.create_review_comment.outputs.comment_id }}\n/" scripts/eas-build-on-success.sh
