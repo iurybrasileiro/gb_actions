@@ -27,13 +27,13 @@ jobs:
             const comment = "Running e2e test";
 
             // Post the review comment using the GitHub client API
-            const issue = await github.rest.issues.get({
-              issue_number: pull_number,
+            const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
+              issue_number: pull_number,
             })
 
-            console.log(issue)
+            console.log(comments)
           
  
       - name: Add PR number in build success hook file
