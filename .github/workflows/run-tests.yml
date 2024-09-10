@@ -19,66 +19,8 @@ jobs:
           fetch-depth: 0
 
       - name: Check for existing 'Running e2e tests' comment
-        id: check_comment
-        run: |
-          COMMENTS_URL="https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
-          COMMENTS=$(curl -s -H "Authorization: Bearer ${{ secrets.MAESTRO_PAT }}" $COMMENTS_URL)
-
-          echo "Fetched comments: $COMMENTS"
-
-          if [[ -z "$COMMENTS" || "$COMMENTS" == "null" ]]; then
-            echo "No comments found or invalid response from API."
-            exit 1
-          fi
-          
-          # Look for 'Running e2e test' comment
-          RUNNING_COMMENT=$(echo "$COMMENTS" | jq '.[] | select(.body | contains("Running e2e test"))')
-          
-          if [[ -z "$RUNNING_COMMENT" ]]; then
-            echo "No running e2e test comment found, continuing to create one."
-            exit 0
-          else
-            COMMENT_ID=$(echo "$RUNNING_COMMENT" | jq '.id')
-            echo "comment_id=$COMMENT_ID" >> $GITHUB_ENV
-            
-            REPLIES_URL="https://api.github.com/repos/${{ github.repository }}/issues/comments/$COMMENT_ID/reactions"
-            REPLIES=$(curl -s -H "Authorization: Bearer ${{ secrets.MAESTRO_PAT }}" $REPLIES_URL)
-            
-            # Ensure replies exist
-            if [[ -z "$(echo "$REPLIES" | jq '. | length')" || "$(echo "$REPLIES" | jq '. | length')" -eq 0 ]]; then
-              echo "Comment exists but has no replies. Stopping action."
-              exit 1
-            fi
-
-            # Extract replies containing 'ANDROID' and 'IOS'
-            ANDROID_REPLY=$(echo "$REPLIES" | jq -r '.[] | select(.body | contains("ANDROID"))')
-            IOS_REPLY=$(echo "$REPLIES" | jq -r '.[] | select(.body | contains("IOS"))')
-            
-            # Check if both replies exist
-            if [[ -z "$ANDROID_REPLY" || -z "$IOS_REPLY" ]]; then
-              echo "Only one platform reply found. Stopping action."
-              exit 1
-            fi
-
-            # Check if both replies contain "PASSED"
-            ANDROID_PASSED=$(echo "$ANDROID_REPLY" | grep -o "PASSED")
-            IOS_PASSED=$(echo "$IOS_REPLY" | grep -o "PASSED")
-            
-            if [[ "$ANDROID_PASSED" == "PASSED" && "$IOS_PASSED" == "PASSED" ]]; then
-              echo "Both Android and iOS tests passed. Stopping action."
-              exit 1
-            fi
-
-            echo "Continuing with the action as one of platforms tests have not passed."
-          fi
- 
-      - name: Add PR number in build success hook file
-        if: github.event_name == 'pull_request'
-        run: sed -i "2s/^/GB_PR_NUMBER=${{ github.event.number }}\n/" scripts/eas-build-on-success.sh
-
-      - name: Create 'Running e2e test' review comment
         uses: actions/github-script@v6
-        id: create_review_comment
+        id: check_comment
         with:
           script: |
             const pull_number = context.issue.number;
@@ -95,7 +37,28 @@ jobs:
 
             // Output the review ID
             core.setOutput("comment_id", review.data.id);
+          
+ 
+      - name: Add PR number in build success hook file
+        if: github.event_name == 'pull_request'
+        run: sed -i "2s/^/GB_PR_NUMBER=${{ github.event.number }}\n/" scripts/eas-build-on-success.sh
 
+      - name: Create 'Running e2e test' review comment
+        uses: actions/github-script@v6
+        id: create_review_comment
+        with:
+          script: |
+            const pull_number = context.issue.number;
+            const comment = "Running e2e test";
+
+            // Post the review comment using the GitHub client API
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue: pull_number,
+            });
+
+            console.log(comments)
 
       - name: Add comment ID to build success hook file
         run: sed -i "3s/^/COMMENT_ID=${{ steps.create_review_comment.outputs.comment_id }}\n/" scripts/eas-build-on-success.sh
