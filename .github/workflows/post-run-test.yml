@@ -64,7 +64,6 @@ jobs:
 
             if (!isAllTestsPassed) {
               core.setFailed('One or both tests failed for Android or iOS');
-              return
             }
 
             const response = await github.rest.pulls.dismissReview({
