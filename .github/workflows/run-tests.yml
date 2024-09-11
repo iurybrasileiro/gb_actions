@@ -114,6 +114,7 @@ jobs:
             });
 
             const reviewComment = reviewComments.data.find(comment => comment.body == comment)
+            console.log(reviewComment)
             
             if (!reviewComment) {
               core.setFailed('Comment not found');
