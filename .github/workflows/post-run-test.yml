@@ -50,18 +50,18 @@ jobs:
 
             const commentsReplies = reviewComments.data.filter(reply => reply.in_reply_to_id == comment.data.id)
 
-            if (replies.length < 2) {
+            if (commentsReplies.length < 2) {
               core.setFailed('No replies');
             }
 
-            const androidComment = replies.find(reply => reply.body.contains("ANDROID"))
-            const iosComment = replies.find(reply => reply.body.contains("IOS"))
+            const androidComment = commentsReplies.find(reply => reply.body.contains("ANDROID"))
+            const iosComment = commentsReplies.find(reply => reply.body.contains("IOS"))
 
             if (!androidComment || !iosComment) {
               core.setFailed('Android or iOS not found');
             }
 
-            const isAllTestsPassed = replies.every(reply => reply.body.contains('PASSED'))
+            const isAllTestsPassed = commentsReplies.every(reply => reply.body.contains('PASSED'))
 
             if (!isAllTestsPassed) {
               core.setFailed('One or both tests failed for Android or iOS');
