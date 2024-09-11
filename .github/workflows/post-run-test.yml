@@ -59,7 +59,7 @@ jobs:
               return
             }
 
-            await octokit.rest.pulls.dismissReview({
+            await github.rest.pulls.dismissReview({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: '${{ github.event.inputs.pull_request_id }}',
