@@ -113,7 +113,7 @@ jobs:
               pull_number: pull_number,
             });
 
-            const reviewComment = reviewComments.data.find(comment => comment.body == comment)
+            const reviewComment = reviewComments.data[0]
             console.log(reviewComment)
             
             if (!reviewComment) {
