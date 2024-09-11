@@ -26,86 +26,94 @@ jobs:
             const pull_number = context.issue.number;
             const commentBody = "Running e2e test";
 
-            const comments = await github.rest.pulls.listReviews({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: pull_number,
-              per_page: 100,
-            })
-
-            const sortedComments = comments.data.sort((a, b) => {
-              return new Date(b.submitted_at) - new Date(a.submitted_at);
+            const commits = github.rest.pulls.listCommits({
+              owner,
+              repo,
+              pull_number,
             });
 
-            const hasRunningTestComment = sortedComments.find(comment => comment.body == commentBody)
+            console.log(commits)
 
-            if (hasRunningTestComment) {
-              const repliesResponse = await github.rest.pulls.listCommentsForReview({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: pull_number,
-                review_id: hasRunningTestComment.id,
-              });
+      #       const comments = await github.rest.pulls.listReviews({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         pull_number: pull_number,
+      #         per_page: 100,
+      #       })
 
-              const replies = repliesResponse.data;
+      #       const sortedComments = comments.data.sort((a, b) => {
+      #         return new Date(b.submitted_at) - new Date(a.submitted_at);
+      #       });
 
-              if (replies.length < 2) {
-                core.setFailed('No replies related to ');
-              }
+      #       const hasRunningTestComment = sortedComments.find(comment => comment.body == commentBody)
 
-              const androidComment = replies.find(reply => reply.body.contains("ANDROID"))
-              const iosComment = replies.find(reply => reply.body.contains("IOS"))
+      #       if (hasRunningTestComment) {
+      #         const repliesResponse = await github.rest.pulls.listCommentsForReview({
+      #           owner: context.repo.owner,
+      #           repo: context.repo.repo,
+      #           pull_number: pull_number,
+      #           review_id: hasRunningTestComment.id,
+      #         });
 
-              if (!androidComment || !iosComment) {
-                core.setFailed('Android or iOS not found');
-              }
+      #         const replies = repliesResponse.data;
 
-              const isAllTestsPassed = replies.every(reply => reply.body.contains('PASSED'))
+      #         if (replies.length < 2) {
+      #           core.setFailed('No replies related to ');
+      #         }
 
-              if (isAllTestsPassed) {
-                console.log('Both Android and iOS tests passed');
-                return
-              }
+      #         const androidComment = replies.find(reply => reply.body.contains("ANDROID"))
+      #         const iosComment = replies.find(reply => reply.body.contains("IOS"))
 
-              core.setFailed('One or both tests failed for Android or iOS');
-            }
+      #         if (!androidComment || !iosComment) {
+      #           core.setFailed('Android or iOS not found');
+      #         }
 
-            console.log("No Running e2e test comment found")
+      #         const isAllTestsPassed = replies.every(reply => reply.body.contains('PASSED'))
 
-      - name: Add PR number in build success hook file
-        if: github.event_name == 'pull_request'
-        run: sed -i "2s/^/PULL_REQUEST_ID=${{ github.event.number }}\n/" scripts/eas-build-on-success.sh
+      #         if (isAllTestsPassed) {
+      #           console.log('Both Android and iOS tests passed');
+      #           return
+      #         }
 
-      - name: Create 'Running e2e test' review comment
-        uses: actions/github-script@v6
-        id: create_review_comment
-        with:
-          script: |
-            const pull_number = context.issue.number;
-            const comment = "Running e2e test";
+      #         core.setFailed('One or both tests failed for Android or iOS');
+      #       }
 
-            // Post the review comment using the GitHub client API
-            const review = await github.rest.pulls.createReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: pull_number,
-              event: 'REQUEST_CHANGES',
-              body: comment
-            });
+      #       console.log("No Running e2e test comment found")
 
-            // Output the review ID
-            core.setOutput("comment_id", review.data.id);
+      # - name: Add PR number in build success hook file
+      #   if: github.event_name == 'pull_request'
+      #   run: sed -i "2s/^/PULL_REQUEST_ID=${{ github.event.number }}\n/" scripts/eas-build-on-success.sh
 
-      - name: Add comment ID to build success hook file
-        run: sed -i "3s/^/COMMENT_ID=${{ steps.create_review_comment.outputs.comment_id }}\n/" scripts/eas-build-on-success.sh
+      # - name: Create 'Running e2e test' review comment
+      #   uses: actions/github-script@v6
+      #   id: create_review_comment
+      #   with:
+      #     script: |
+      #       const pull_number = context.issue.number;
+      #       const comment = "Running e2e test";
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-        id: extract_branch
+      #       // Post the review comment using the GitHub client API
+      #       const review = await github.rest.pulls.createReview({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         pull_number: pull_number,
+      #         event: 'REQUEST_CHANGES',
+      #         body: comment
+      #       });
 
-      - name: Add branch name to build success hook file
-        run: sed -i "4s/^/BRANCH=${{ steps.extract_branch.outputs.branch }}\n/" scripts/eas-build-on-success.sh
+      #       // Output the review ID
+      #       core.setOutput("comment_id", review.data.id);
 
-      - name: Cat scripts/eas-build-on-success.sh
-        run: cat scripts/eas-build-on-success.sh
+      # - name: Add comment ID to build success hook file
+      #   run: sed -i "3s/^/COMMENT_ID=${{ steps.create_review_comment.outputs.comment_id }}\n/" scripts/eas-build-on-success.sh
+
+      # - name: Extract branch name
+      #   shell: bash
+      #   run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+      #   id: extract_branch
+
+      # - name: Add branch name to build success hook file
+      #   run: sed -i "4s/^/BRANCH=${{ steps.extract_branch.outputs.branch }}\n/" scripts/eas-build-on-success.sh
+
+      # - name: Cat scripts/eas-build-on-success.sh
+      #   run: cat scripts/eas-build-on-success.sh
