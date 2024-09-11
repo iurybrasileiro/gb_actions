@@ -36,10 +36,17 @@ jobs:
         id: resolve_conversation
         with:
           script: |
-            const response = await github.rest.pulls.getReviewComment({
+            const comment = await github.rest.pulls.getReviewComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               comment_id: '${{ github.event.inputs.review_comment_id }}',
             });
 
-            console.log(response.data);
+            const review = await github.rest.pulls.getReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: '${{ github.event.inputs.pull_request_id }}',
+              review_id: comment.pull_request_review_id,
+            });
+
+            console.log(review.data);
