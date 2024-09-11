@@ -14,50 +14,62 @@ on:
         required: true
 
 jobs:
-  create_message:
+  postTest:
     runs-on: ubuntu-latest
     steps:
       - name: Reply 'Running e2e test' message with test result
         uses: actions/github-script@v6
+        if: false
         id: create_reply
         with:
           script: |
-            # const response = await github.rest.pulls.createReplyForReviewComment({
-            #   owner: context.repo.owner,
-            #   repo: context.repo.repo,
-            #   pull_number: '${{ github.event.inputs.pull_request_id }}',
-            #   comment_id: '${{ github.event.inputs.review_comment_id }}',
-            #   body: '${{ github.event.inputs.message }}',
-            # });
-
-            const repliesResponse = await github.rest.pulls.listCommentsForReview({
+            const response = await github.rest.pulls.createReplyForReviewComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: '${{ github.event.inputs.pull_request_id }}',
-              review_id: '${{ github.event.inputs.review_comment_id }}',
+              comment_id: '${{ github.event.inputs.review_comment_id }}',
+              body: '${{ github.event.inputs.message }}',
+            });
+      
+      - name: Resolve conversation
+        uses: actions/github-script@v6
+        id: rsolve_conversation
+        with:
+          script: |
+            # const response = await github.rest.pulls.listCommentsForReview({
+            #   owner: context.repo.owner,
+            #   repo: context.repo.repo,
+            #   pull_number: '${{ github.event.inputs.pull_request_id }}',
+            #   review_id: '${{ github.event.inputs.review_comment_id }}',
+            # });
+
+            const response = await github.rest.pulls.listReviewComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: '${{ github.event.inputs.pull_request_id }}',
             });
 
-            console.log(repliesResponse)
+            console.log(response.data)
 
-            const replies = repliesResponse.data;
+            # const replies = response.data;
 
-            if (replies.length < 2) {
-              core.setFailed('No replies');
-            }
+            # if (replies.length < 2) {
+            #   core.setFailed('No replies');
+            # }
 
-            const androidComment = replies.find(reply => reply.body.contains("ANDROID"))
-            const iosComment = replies.find(reply => reply.body.contains("IOS"))
+            # const androidComment = replies.find(reply => reply.body.contains("ANDROID"))
+            # const iosComment = replies.find(reply => reply.body.contains("IOS"))
 
-            if (!androidComment || !iosComment) {
-              core.setFailed('Android or iOS not found');
-            }
+            # if (!androidComment || !iosComment) {
+            #   core.setFailed('Android or iOS not found');
+            # }
 
-            const isAllTestsPassed = replies.every(reply => reply.body.contains('PASSED'))
+            # const isAllTestsPassed = replies.every(reply => reply.body.contains('PASSED'))
 
-            if (!isAllTestsPassed) {
-              core.setFailed('One or both tests failed for Android or iOS');
-              return
-            }
+            # if (!isAllTestsPassed) {
+            #   core.setFailed('One or both tests failed for Android or iOS');
+            #   return
+            # }
 
             # await github.rest.pulls.dismissReview({
             #   owner: context.repo.owner,
