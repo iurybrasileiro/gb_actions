@@ -113,8 +113,12 @@ jobs:
               pull_number: '${{ github.event.inputs.pull_request_id }}',
             });
 
-            const reviewComment = reviewComments.data.[0]
+            const reviewComment = reviewComments.data[0]
             console.log(reviewComment)
+            
+            if (!reviewComment) {
+              core.setFailed('Comment not found');
+            }
 
             // Output the review ID
             core.setOutput("comment_id", reviewComment.id);
