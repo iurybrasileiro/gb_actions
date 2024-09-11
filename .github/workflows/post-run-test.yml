@@ -42,13 +42,11 @@ jobs:
               comment_id: '${{ github.event.inputs.review_comment_id }}',
             });
 
-            console.log('pull_request_review_id', comment.pull_request_review_id);
-
             const review = await github.rest.pulls.getReview({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: '${{ github.event.inputs.pull_request_id }}',
-              review_id: comment.pull_request_review_id,
+              review_id: comment.data.pull_request_review_id,
             });
 
             console.log(review.data);
