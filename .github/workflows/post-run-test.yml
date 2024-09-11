@@ -54,6 +54,10 @@ jobs:
               core.setFailed('No replies');
             }
 
+            console.log("<===================================================>");
+            console.log(commentsReplies)
+            console.log("<===================================================>");
+
             const androidComment = commentsReplies.find(reply => reply.body.contains("ANDROID"))
             const iosComment = commentsReplies.find(reply => reply.body.contains("IOS"))
 
