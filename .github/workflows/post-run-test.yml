@@ -33,7 +33,7 @@ jobs:
       
       - name: Resolve conversation
         uses: actions/github-script@v6
-        id: rsolve_conversation
+        id: resolve_conversation
         with:
           script: |
             # const response = await github.rest.pulls.listCommentsForReview({
@@ -49,7 +49,7 @@ jobs:
               pull_number: '${{ github.event.inputs.pull_request_id }}',
             });
 
-            console.log(response.data)
+            console.log(response.data);
 
             # const replies = response.data;
 
