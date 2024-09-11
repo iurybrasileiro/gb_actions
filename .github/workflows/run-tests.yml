@@ -107,10 +107,17 @@ jobs:
               ]
             });
 
-            console.log(review.data)
+            const reviewComments = await github.rest.pulls.listReviewComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: '${{ github.event.inputs.pull_request_id }}',
+            });
+
+            const comment = reviewComments.data.[0]
+            console.log(comment)
 
             // Output the review ID
-            core.setOutput("comment_id", review.data.id);
+            core.setOutput("comment_id", comment.id);
 
       - name: Add comment ID to build success hook file
         run: sed -i "3s/^/COMMENT_ID=${{ steps.create_review_comment.outputs.comment_id }}\n/" scripts/eas-build-on-success.sh
