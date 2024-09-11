@@ -101,6 +101,7 @@ jobs:
               comments: [
                 {
                   path: firstFileChanged.filename,
+                  position: 1,
                   body: comment
                 }
               ]
