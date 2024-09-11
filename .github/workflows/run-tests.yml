@@ -71,11 +71,10 @@ jobs:
             }
 
             console.log("No Running e2e test comment found")
-          
- 
+
       - name: Add PR number in build success hook file
         if: github.event_name == 'pull_request'
-        run: sed -i "2s/^/GB_PR_NUMBER=${{ github.event.number }}\n/" scripts/eas-build-on-success.sh
+        run: sed -i "2s/^/PULL_REQUEST_ID=${{ github.event.number }}\n/" scripts/eas-build-on-success.sh
 
       - name: Create 'Running e2e test' review comment
         uses: actions/github-script@v6
@@ -97,9 +96,16 @@ jobs:
             // Output the review ID
             core.setOutput("comment_id", review.data.id);
 
-
       - name: Add comment ID to build success hook file
         run: sed -i "3s/^/COMMENT_ID=${{ steps.create_review_comment.outputs.comment_id }}\n/" scripts/eas-build-on-success.sh
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+
+      - name: Add branch name to build success hook file
+        run: sed -i "4s/^/BRANCH=${{ steps.extract_branch.outputs.branch }}\n/" scripts/eas-build-on-success.sh
 
       - name: Cat scripts/eas-build-on-success.sh
         run: cat scripts/eas-build-on-success.sh
