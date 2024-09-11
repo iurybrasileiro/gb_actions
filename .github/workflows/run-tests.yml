@@ -27,9 +27,9 @@ jobs:
             const commentBody = "Running e2e test";
 
             const commits = github.rest.pulls.listCommits({
-              owner,
-              repo,
-              pull_number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pull_number,
             });
 
             console.log(commits)
