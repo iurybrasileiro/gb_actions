@@ -19,7 +19,6 @@ jobs:
     steps:
       - name: Reply 'Running e2e test' message with test result
         uses: actions/github-script@v6
-        if: false
         id: create_reply
         with:
           script: |
@@ -51,7 +50,7 @@ jobs:
             const commentsReplies = reviewComments.data.filter(reply => reply.in_reply_to_id == comment.data.id)
 
             if (commentsReplies.length < 2) {
-              core.setFailed('No replies');
+              return
             }
 
             const androidComment = commentsReplies.find(reply => reply.body.includes("ANDROID"))
