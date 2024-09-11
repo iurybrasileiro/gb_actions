@@ -107,6 +107,8 @@ jobs:
               ]
             });
 
+            console.log(review.data)
+
             // Output the review ID
             core.setOutput("comment_id", review.data.id);
 
