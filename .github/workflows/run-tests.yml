@@ -97,8 +97,13 @@ jobs:
               repo: context.repo.repo,
               pull_number: pull_number,
               event: 'REQUEST_CHANGES',
-              path: firstFileChanged.filename,
-              body: comment
+              body: comment,
+              comments: [
+                {
+                  path: firstFileChanged.filename,
+                  body: comment
+                }
+              ]
             });
 
             // Output the review ID
