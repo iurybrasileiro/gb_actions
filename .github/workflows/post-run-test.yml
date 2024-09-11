@@ -22,15 +22,13 @@ jobs:
         id: create_reply
         with:
           script: |
-            const response = await github.rest.pulls.createReplyForReviewComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: '${{ github.event.inputs.pull_request_id }}',
-              comment_id: '${{ github.event.inputs.review_comment_id }}',
-              body: '${{ github.event.inputs.message }}',
-            });
-
-            console.log(response);
+            # const response = await github.rest.pulls.createReplyForReviewComment({
+            #   owner: context.repo.owner,
+            #   repo: context.repo.repo,
+            #   pull_number: '${{ github.event.inputs.pull_request_id }}',
+            #   comment_id: '${{ github.event.inputs.review_comment_id }}',
+            #   body: '${{ github.event.inputs.message }}',
+            # });
 
             const repliesResponse = await github.rest.pulls.listCommentsForReview({
               owner: context.repo.owner,
@@ -38,6 +36,8 @@ jobs:
               pull_number: '${{ github.event.inputs.pull_request_id }}',
               review_id: '${{ github.event.inputs.review_comment_id }}',
             });
+
+            console.log(repliesResponse)
 
             const replies = repliesResponse.data;
 
@@ -59,10 +59,10 @@ jobs:
               return
             }
 
-            await github.rest.pulls.dismissReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: '${{ github.event.inputs.pull_request_id }}',
-              review_id: '${{ github.event.inputs.review_comment_id }}',
-              message: 'All tests passed ✅',
-            });
+            # await github.rest.pulls.dismissReview({
+            #   owner: context.repo.owner,
+            #   repo: context.repo.repo,
+            #   pull_number: '${{ github.event.inputs.pull_request_id }}',
+            #   review_id: '${{ github.event.inputs.review_comment_id }}',
+            #   message: 'All tests passed ✅',
+            # });
