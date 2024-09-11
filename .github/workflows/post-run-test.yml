@@ -48,6 +48,34 @@ jobs:
               pull_number: '${{ github.event.inputs.pull_request_id }}',
             });
 
+            const commentsReplies = reviewComments.data.filter(reply => reply.in_reply_to_id == comment.data.id)
+
+            if (replies.length < 2) {
+              core.setFailed('No replies');
+            }
+
+            const androidComment = replies.find(reply => reply.body.contains("ANDROID"))
+            const iosComment = replies.find(reply => reply.body.contains("IOS"))
+
+            if (!androidComment || !iosComment) {
+              core.setFailed('Android or iOS not found');
+            }
+
+            const isAllTestsPassed = replies.every(reply => reply.body.contains('PASSED'))
+
+            if (!isAllTestsPassed) {
+              core.setFailed('One or both tests failed for Android or iOS');
+              return
+            }
+
+            const response = await github.rest.pulls.dismissReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: '${{ github.event.inputs.pull_request_id }}',
+              review_id: comment.data.pull_request_review_id,
+              message: 'All tests passed ✅',
+            });
+
             console.log("<===================================================>");
-            console.log(reviewComments.data);
+            console.log(response);
             console.log("<===================================================>");
