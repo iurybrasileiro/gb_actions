@@ -19,64 +19,64 @@ jobs:
         id: create_reply
         with:
           script: |
-            console.log(github.event)
+            console.log(github.event.inputs)
 
-            const comments = await github.rest.pulls.listReviews({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: github.event.inputs.pull_request_id,
-              per_page: 100,
-            })
+            # const comments = await github.rest.pulls.listReviews({
+            #   owner: context.repo.owner,
+            #   repo: context.repo.repo,
+            #   pull_number: github.event.inputs.pull_request_id,
+            #   per_page: 100,
+            # })
 
-            const sortedComments = comments.data.sort((a, b) => {
-              return new Date(b.submitted_at) - new Date(a.submitted_at);
-            });
+            # const sortedComments = comments.data.sort((a, b) => {
+            #   return new Date(b.submitted_at) - new Date(a.submitted_at);
+            # });
 
-            const comment = sortedComments.find(comment => comment.body == commentBody)
+            # const comment = sortedComments.find(comment => comment.body == commentBody)
 
-            if (!comment) {
-              core.setFailed('Comment not found');
-            }
+            # if (!comment) {
+            #   core.setFailed('Comment not found');
+            # }
 
-            await github.rest.pulls.createReplyForReviewComment({
-              owner,
-              repo,
-              pull_number: github.event.inputs.pull_request_id,
-              comment_id: comment.id,
-              body: github.event.inputs.message,
-            });
+            # await github.rest.pulls.createReplyForReviewComment({
+            #   owner,
+            #   repo,
+            #   pull_number: github.event.inputs.pull_request_id,
+            #   comment_id: comment.id,
+            #   body: github.event.inputs.message,
+            # });
 
-            const repliesResponse = await github.rest.pulls.listCommentsForReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: pull_number,
-              review_id: comment.id,
-            });
+            # const repliesResponse = await github.rest.pulls.listCommentsForReview({
+            #   owner: context.repo.owner,
+            #   repo: context.repo.repo,
+            #   pull_number: pull_number,
+            #   review_id: comment.id,
+            # });
 
-            const replies = repliesResponse.data;
+            # const replies = repliesResponse.data;
 
-            if (replies.length < 2) {
-              core.setFailed('No replies');
-            }
+            # if (replies.length < 2) {
+            #   core.setFailed('No replies');
+            # }
 
-            const androidComment = replies.find(reply => reply.body.contains("ANDROID"))
-            const iosComment = replies.find(reply => reply.body.contains("IOS"))
+            # const androidComment = replies.find(reply => reply.body.contains("ANDROID"))
+            # const iosComment = replies.find(reply => reply.body.contains("IOS"))
 
-            if (!androidComment || !iosComment) {
-              core.setFailed('Android or iOS not found');
-            }
+            # if (!androidComment || !iosComment) {
+            #   core.setFailed('Android or iOS not found');
+            # }
 
-            const isAllTestsPassed = replies.every(reply => reply.body.contains('PASSED'))
+            # const isAllTestsPassed = replies.every(reply => reply.body.contains('PASSED'))
 
-            if (!isAllTestsPassed) {
-              core.setFailed('One or both tests failed for Android or iOS');
-              return
-            }
+            # if (!isAllTestsPassed) {
+            #   core.setFailed('One or both tests failed for Android or iOS');
+            #   return
+            # }
 
-            await octokit.rest.pulls.dismissReview({
-              owner,
-              repo,
-              pull_number: github.event.inputs.pull_request_id,
-              review_id: comment.id,
-              message: 'All tests passed ✅',
-            });
+            # await octokit.rest.pulls.dismissReview({
+            #   owner,
+            #   repo,
+            #   pull_number: github.event.inputs.pull_request_id,
+            #   review_id: comment.id,
+            #   message: 'All tests passed ✅',
+            # });
