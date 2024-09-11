@@ -36,6 +36,8 @@ jobs:
               core.setFailed('Comment not found');
             }
 
+            console.log(comment)
+
             await github.rest.pulls.createReplyForReviewComment({
               owner,
               repo,
@@ -47,7 +49,7 @@ jobs:
             const repliesResponse = await github.rest.pulls.listCommentsForReview({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: pull_number,
+              pull_number: '${{ github.event.inputs.pull_request_id }}',
               review_id: comment.id,
             });
 
