@@ -23,9 +23,9 @@ jobs:
         with:
           script: |
             const comments = await github.rest.pulls.listReviewComments({
-              owner,
-              repo,
-              pull_number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: '${{ github.event.inputs.pull_request_id }}',
             });
 
             console.log(comments)
