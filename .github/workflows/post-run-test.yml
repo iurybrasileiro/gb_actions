@@ -22,7 +22,7 @@ jobs:
             const comments = await github.rest.pulls.listReviews({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: github.event.inputs.pull_request_id,
+              pull_number: '${{ github.event.inputs.pull_request_id }}',
               per_page: 100,
             })
 
@@ -39,9 +39,9 @@ jobs:
             await github.rest.pulls.createReplyForReviewComment({
               owner,
               repo,
-              pull_number: github.event.inputs.pull_request_id,
+              pull_number: '${{ github.event.inputs.pull_request_id }}',
               comment_id: comment.id,
-              body: github.event.inputs.message,
+              body: '${{ github.event.inputs.message }}',
             });
 
             const repliesResponse = await github.rest.pulls.listCommentsForReview({
@@ -74,7 +74,7 @@ jobs:
             await octokit.rest.pulls.dismissReview({
               owner,
               repo,
-              pull_number: github.event.inputs.pull_request_id,
+              pull_number: '${{ github.event.inputs.pull_request_id }}',
               review_id: comment.id,
               message: 'All tests passed ✅',
             });
