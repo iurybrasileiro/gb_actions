@@ -32,7 +32,9 @@ jobs:
               pull_number: pull_number,
             });
 
-            console.log(commits)
+            const commit = commits[commits.length - 1]
+
+            console.log(JSON.stringfy(commit))
 
       #       const comments = await github.rest.pulls.listReviews({
       #         owner: context.repo.owner,
