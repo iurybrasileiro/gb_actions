@@ -6,6 +6,9 @@ on:
       pull_request_id:
         description: "ID of the pull request"
         required: true
+      review_comment_id:
+        description: "ID of review comment"
+        required: true
       message:
         description: "Message"
         required: true
@@ -19,28 +22,11 @@ jobs:
         id: create_reply
         with:
           script: |
-            const comments = await github.rest.pulls.listReviews({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: '${{ github.event.inputs.pull_request_id }}',
-              per_page: 100,
-            })
-
-            const sortedComments = comments.data.sort((a, b) => {
-              return new Date(b.submitted_at) - new Date(a.submitted_at);
-            });
-
-            const comment = sortedComments.find(comment => comment.body == commentBody)
-
-            if (!comment) {
-              core.setFailed('Comment not found');
-            }
-
             const response = await github.rest.pulls.createReplyForReviewComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: '${{ github.event.inputs.pull_request_id }}',
-              comment_id: comment.id,
+              comment_id: '${{ github.event.inputs.review_comment_id }}',
               body: '${{ github.event.inputs.message }}',
             });
 
@@ -50,7 +36,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: '${{ github.event.inputs.pull_request_id }}',
-              review_id: comment.id,
+              review_id: '${{ github.event.inputs.review_comment_id }}',
             });
 
             const replies = repliesResponse.data;
@@ -77,6 +63,6 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: '${{ github.event.inputs.pull_request_id }}',
-              review_id: comment.id,
+              review_id: '${{ github.event.inputs.review_comment_id }}',
               message: 'All tests passed ✅',
             });
