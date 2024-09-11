@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       pull_request_id:
-        description: "Second parameter"
+        description: "ID of the pull request"
         required: true
       message:
         description: "Message"
@@ -14,10 +14,6 @@ jobs:
   create_message:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      
       - name: Reply 'Running e2e test' message with test result
         uses: actions/github-script@v6
         id: create_reply
