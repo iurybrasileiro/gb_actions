@@ -66,7 +66,7 @@ jobs:
               core.setFailed('One or both tests failed for Android or iOS');
             }
 
-            const response = await github.rest.pulls.dismissReview({
+            await github.rest.pulls.dismissReview({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: '${{ github.event.inputs.pull_request_id }}',
@@ -74,6 +74,9 @@ jobs:
               message: 'All tests passed ✅',
             });
 
-            console.log("<===================================================>");
-            console.log(response);
-            console.log("<===================================================>");
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: '${{ github.event.inputs.pull_request_id }}',
+              event: 'APPROVE',
+            });
