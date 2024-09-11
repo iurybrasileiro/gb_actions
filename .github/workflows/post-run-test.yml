@@ -36,12 +36,10 @@ jobs:
         id: resolve_conversation
         with:
           script: |
-            const response = await github.rest.pulls.getReviewComment({
+            const response = await github.rest.pulls.listReviewComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              comment_id: '${{ github.event.inputs.review_comment_id }}',
+              pull_number: '${{ github.event.inputs.pull_request_id }}',
             });
 
             console.log(response.data);
-
-            const replies = response.data;
