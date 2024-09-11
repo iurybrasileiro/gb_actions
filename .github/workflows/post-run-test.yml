@@ -22,14 +22,6 @@ jobs:
         id: create_reply
         with:
           script: |
-            const comments = await github.rest.pulls.listReviewComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: '${{ github.event.inputs.pull_request_id }}',
-            });
-
-            console.log(comments)
-
             const response = await github.rest.pulls.createReplyForReviewComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
