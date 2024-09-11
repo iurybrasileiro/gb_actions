@@ -55,7 +55,7 @@ jobs:
             }
 
             console.log("<===================================================>");
-            console.log(commentsReplies)
+            console.log(commentsReplies.forEach(item => item.body))
             console.log("<===================================================>");
 
             const androidComment = commentsReplies.find(reply => reply.body.contains("ANDROID"))
