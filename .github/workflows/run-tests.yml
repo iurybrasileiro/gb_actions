@@ -32,7 +32,7 @@ jobs:
               pull_number: pull_number,
             });
 
-            const commit = commits[commits.length - 1]
+            const commit = commits.data[commits.data.length - 1]
 
             console.log(JSON.stringify(commit))
 
