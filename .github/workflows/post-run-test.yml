@@ -46,7 +46,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: '${{ github.event.inputs.pull_request_id }}',
-              review_id: review_id: comment.data.pull_request_review_id,,
+              review_id: review_id: comment.data.pull_request_review_id,
             });
 
             console.log("<===================================================>");
