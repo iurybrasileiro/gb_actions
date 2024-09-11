@@ -19,9 +19,6 @@ jobs:
         id: create_reply
         with:
           script: |
-            console.log('owner', context.repo.owner)
-            console.log('repo', context.repo.repo)
-
             const comments = await github.rest.pulls.listReviews({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -29,11 +26,14 @@ jobs:
               per_page: 100,
             })
 
+            console.log(comments)
+
             const sortedComments = comments.data.sort((a, b) => {
               return new Date(b.submitted_at) - new Date(a.submitted_at);
             });
 
             const comment = sortedComments.find(comment => comment.body == commentBody)
+
 
             if (!comment) {
               core.setFailed('Comment not found');
