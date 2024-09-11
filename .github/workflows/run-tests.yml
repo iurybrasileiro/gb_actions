@@ -110,7 +110,7 @@ jobs:
             const reviewComments = await github.rest.pulls.listReviewComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: '${{ github.event.inputs.pull_request_id }}',
+              pull_number: pull_number,
             });
 
             console.log(reviewComments)
