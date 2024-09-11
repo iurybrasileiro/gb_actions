@@ -26,15 +26,13 @@ jobs:
             const pull_number = context.issue.number;
             const commentBody = "Running e2e test";
 
-            const commits = await github.rest.pulls.listCommits({
+            const filesChanged = await github.rest.pulls.listFiles({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: pull_number,
             });
 
-            const commit = commits.data[commits.data.length - 1]
-
-            console.log(JSON.stringify(commit))
+            console.log(filesChanged)
 
       #       const comments = await github.rest.pulls.listReviews({
       #         owner: context.repo.owner,
