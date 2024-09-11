@@ -55,31 +55,5 @@ jobs:
             }
 
             console.log("<===================================================>");
-            console.log(commentsReplies.forEach(item => item.body))
-            console.log("<===================================================>");
-
-            const androidComment = commentsReplies.find(reply => reply.body.contains("ANDROID"))
-            const iosComment = commentsReplies.find(reply => reply.body.contains("IOS"))
-
-            if (!androidComment || !iosComment) {
-              core.setFailed('Android or iOS not found');
-            }
-
-            const isAllTestsPassed = commentsReplies.every(reply => reply.body.contains('PASSED'))
-
-            if (!isAllTestsPassed) {
-              core.setFailed('One or both tests failed for Android or iOS');
-              return
-            }
-
-            const response = await github.rest.pulls.dismissReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: '${{ github.event.inputs.pull_request_id }}',
-              review_id: comment.data.pull_request_review_id,
-              message: 'All tests passed ✅',
-            });
-
-            console.log("<===================================================>");
-            console.log(response);
+            console.log(commentsReplies.map(item => item.body))
             console.log("<===================================================>");
