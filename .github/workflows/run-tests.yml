@@ -34,7 +34,7 @@ jobs:
 
             const commit = commits[commits.length - 1]
 
-            console.log(JSON.stringfy(commit))
+            console.log(JSON.stringify(commit))
 
       #       const comments = await github.rest.pulls.listReviews({
       #         owner: context.repo.owner,
