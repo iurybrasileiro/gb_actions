@@ -113,15 +113,18 @@ jobs:
               pull_number: '${{ github.event.inputs.pull_request_id }}',
             });
 
-            const reviewComment = reviewComments.data[0]
-            console.log(reviewComment)
-            
-            if (!reviewComment) {
-              core.setFailed('Comment not found');
-            }
+            console.log(reviewComments)
+            core.setFailed('Comment not found');
 
-            // Output the review ID
-            core.setOutput("comment_id", reviewComment.id);
+            # const reviewComment = reviewComments.data[0]
+            # console.log(reviewComment)
+            
+            # if (!reviewComment) {
+            #   core.setFailed('Comment not found');
+            # }
+
+            # // Output the review ID
+            # core.setOutput("comment_id", reviewComment.id);
 
       - name: Add comment ID to build success hook file
         run: sed -i "3s/^/COMMENT_ID=${{ steps.create_review_comment.outputs.comment_id }}\n/" scripts/eas-build-on-success.sh
