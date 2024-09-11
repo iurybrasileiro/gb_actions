@@ -39,7 +39,7 @@ jobs:
             const response = await github.rest.pulls.getReviewComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: '${{ github.event.inputs.pull_request_id }}',
+              comment_id: '${{ github.event.inputs.review_comment_id }}',
             });
 
             console.log(response.data);
