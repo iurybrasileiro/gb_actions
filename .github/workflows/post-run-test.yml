@@ -23,8 +23,8 @@ jobs:
         with:
           script: |
             const response = await github.rest.pulls.createReplyForReviewComment({
-              owner,
-              repo,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
               pull_number: '${{ github.event.inputs.pull_request_id }}',
               comment_id: '${{ github.event.inputs.review_comment_id }}',
               body: '${{ github.event.inputs.message }}',
@@ -60,8 +60,8 @@ jobs:
             }
 
             await octokit.rest.pulls.dismissReview({
-              owner,
-              repo,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
               pull_number: '${{ github.event.inputs.pull_request_id }}',
               review_id: '${{ github.event.inputs.review_comment_id }}',
               message: 'All tests passed ✅',
