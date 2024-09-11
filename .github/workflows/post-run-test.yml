@@ -4,7 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       pull_request_id:
-        description: "Second parameter"
+        description: "ID of the pull request"
+        required: true
+      review_comment_id:
+        description: "ID of review comment"
         required: true
       message:
         description: "Message"
@@ -14,45 +17,26 @@ jobs:
   create_message:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      
       - name: Reply 'Running e2e test' message with test result
         uses: actions/github-script@v6
         id: create_reply
         with:
           script: |
-            const comments = await github.rest.pulls.listReviews({
+            const response = await github.rest.pulls.createReplyForReviewComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: github.event.inputs.pull_request_id,
-              per_page: 100,
-            })
-
-            const sortedComments = comments.data.sort((a, b) => {
-              return new Date(b.submitted_at) - new Date(a.submitted_at);
+              pull_number: '${{ github.event.inputs.pull_request_id }}',
+              comment_id: '${{ github.event.inputs.review_comment_id }}',
+              body: '${{ github.event.inputs.message }}',
             });
 
-            const comment = sortedComments.find(comment => comment.body == commentBody)
-
-            if (!comment) {
-              core.setFailed('Comment not found');
-            }
-
-            await github.rest.pulls.createReplyForReviewComment({
-              owner,
-              repo,
-              pull_number: github.event.inputs.pull_request_id,
-              comment_id: comment.id,
-              body: github.event.inputs.message,
-            });
+            console.log(response);
 
             const repliesResponse = await github.rest.pulls.listCommentsForReview({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: pull_number,
-              review_id: comment.id,
+              pull_number: '${{ github.event.inputs.pull_request_id }}',
+              review_id: '${{ github.event.inputs.review_comment_id }}',
             });
 
             const replies = repliesResponse.data;
@@ -75,10 +59,10 @@ jobs:
               return
             }
 
-            await octokit.rest.pulls.dismissReview({
-              owner,
-              repo,
-              pull_number: github.event.inputs.pull_request_id,
-              review_id: comment.id,
+            await github.rest.pulls.dismissReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: '${{ github.event.inputs.pull_request_id }}',
+              review_id: '${{ github.event.inputs.review_comment_id }}',
               message: 'All tests passed ✅',
             });
