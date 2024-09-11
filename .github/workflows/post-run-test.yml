@@ -19,6 +19,9 @@ jobs:
         id: create_reply
         with:
           script: |
+            console.log('owner', context.repo.owner)
+            console.log('repo', context.repo.repo)
+
             const comments = await github.rest.pulls.listReviews({
               owner: context.repo.owner,
               repo: context.repo.repo,
