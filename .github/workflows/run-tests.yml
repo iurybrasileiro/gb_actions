@@ -77,13 +77,13 @@ jobs:
             return
 
       - name: Add PR number in build success hook file
-        if: github.event_name == 'pull_request' && !steps.check_comment.outputs.skip_next_steps
+        if: github.event_name == 'pull_request' && steps.check_comment.outputs.skip_next_steps == false
         run: sed -i "2s/^/PULL_REQUEST_ID=${{ github.event.number }}\n/" scripts/eas-build-on-success.sh
 
       - name: Create 'Running e2e test' review comment
         uses: actions/github-script@v6
         id: create_review_comment
-        if: !steps.check_comment.outputs.skip_next_steps
+        if: steps.check_comment.outputs.skip_next_steps == false
         with:
           script: |
             const pull_number = context.issue.number;
@@ -128,19 +128,19 @@ jobs:
             core.setOutput("comment_id", reviewComment.id);
 
       - name: Add comment ID to build success hook file
-        if: !steps.check_comment.outputs.skip_next_steps
+        if: steps.check_comment.outputs.skip_next_steps == false
         run: sed -i "3s/^/COMMENT_ID=${{ steps.create_review_comment.outputs.comment_id }}\n/" scripts/eas-build-on-success.sh
 
       - name: Extract branch name
         shell: bash
         id: extract_branch
-        if: !steps.check_comment.outputs.skip_next_steps
+        if: steps.check_comment.outputs.skip_next_steps == false
         run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
 
       - name: Add branch name to build success hook file
-        if: !steps.check_comment.outputs.skip_next_steps
+        if: steps.check_comment.outputs.skip_next_steps == false
         run: sed -i "4s/^/BRANCH=${{ steps.extract_branch.outputs.branch }}\n/" scripts/eas-build-on-success.sh
 
       - name: Cat scripts/eas-build-on-success.sh
-        if: !steps.check_comment.outputs.skip_next_steps
+        if: steps.check_comment.outputs.skip_next_steps == false
         run: cat scripts/eas-build-on-success.sh
