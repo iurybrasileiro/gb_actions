@@ -76,7 +76,7 @@ jobs:
             core.setOutput("skip_next_steps", false);
 
       - name: Output of
-        run: echo steps.check_comment.outputs.skip_next_steps
+        run: echo ${{ steps.check_comment.outputs.skip_next_steps }}
 
       - name: Add PR number in build success hook file
         if: github.event_name == 'pull_request' && steps.check_comment.outputs.skip_next_steps == 'true'
