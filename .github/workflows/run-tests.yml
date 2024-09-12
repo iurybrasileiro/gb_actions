@@ -50,7 +50,7 @@ jobs:
               const replies = repliesResponse.data;
 
               if (replies.length < 2) {
-                core.setOutput("skip_next_steps", "true");
+                core.setOutput("skip_next_steps", true);
                 return
               }
 
@@ -58,23 +58,22 @@ jobs:
               const iosComment = replies.find(reply => reply.body.includes("IOS"))
 
               if (!androidComment || !iosComment) {
-                core.setOutput("skip_next_steps", "true");
+                core.setOutput("skip_next_steps", true);
                 return
               }
 
               const isAllTestsPassed = replies.every(reply => reply.body.includes('PASSED'))
 
               if (isAllTestsPassed) {
-                core.setOutput("skip_next_steps", "true");
+                core.setOutput("skip_next_steps", true);
                 return
               }
 
-              core.setOutput("skip_next_steps", "false");
+              core.setOutput("skip_next_steps", false);
               return
             }
 
-            core.setOutput("skip_next_steps", "false");
-            return
+            core.setOutput("skip_next_steps", false);
 
       - name: Add PR number in build success hook file
         if: github.event_name == 'pull_request' && steps.check_comment.outputs.skip_next_steps == 'true'
