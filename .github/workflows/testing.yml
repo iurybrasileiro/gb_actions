@@ -52,10 +52,10 @@ jobs:
             });
 
             console.log(response)
+            core.setOutput("pull_request_number", response.data.number);
 
       - name: Merge pull request
         uses: actions/github-script@v6
-        if: false
         with:
           script: |
             const response = await github.rest.pulls.merge({
@@ -68,7 +68,6 @@ jobs:
 
       - name: Delete branch
         uses: actions/github-script@v6
-        if: false
         with:
           script: |
             const response = await github.rest.git.deleteRef({
