@@ -30,7 +30,7 @@ jobs:
           git fetch
           git pull
           git checkout -b ${{ steps.define_branch.outputs.branch_name }}
-          git remote set-url origin https://${{ secrets.PAT }}@github.com/fluyoapp/mobile.git/
+          git remote set-url origin https://github.com/iurybrasileiro/gb_actions.git
           git push origin ${{ steps.define_branch.outputs.branch_name }}
 
       - name: Create pull request
