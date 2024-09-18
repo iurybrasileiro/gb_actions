@@ -21,31 +21,38 @@ jobs:
 
       - uses: actions/setup-dotnet@v2
 
+      - name: Define branch name
+        id: define_branch
+        run: echo "branch_name=release-candidate/3.0.0" >> $GITHUB_OUTPUT
+
       - name: Create release candidate branch
         run: |
           git fetch
           git pull
-          git checkout -b release-candidate/2.0.0
+          git checkout -b ${{ steps.define_branch.outputs.branch_name }}
           git remote set-url origin https://github.com/iurybrasileiro/gb_actions.git
-          git push origin release-candidate/2.0.0
+          git push origin ${{ steps.define_branch.outputs.branch_name }}
+
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.define_branch.outputs.branch_name }}
+          fetch-depth: 0
 
       - name: Create pull request
         uses: actions/github-script@v6
         id: create_pull_request
         with:
           script: |
-            const branch_name = 'release-candidate/2.0.0'
             const response = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Merge ${branch_name} into testing`,
-              head: 'release-candidate/2.0.0',
+              title: `Merge ${{ steps.define_branch.outputs.branch_name }} into testing`,
+              head: `${{ steps.define_branch.outputs.branch_name }}`,
               base: 'testing',
             });
 
-            core.setOutput("pull_request_number", response.data.number);
-
             console.log(response)
+            core.setOutput("pull_request_number", response.data.number);
 
       - name: Merge pull request
         uses: actions/github-script@v6
@@ -63,11 +70,10 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const branch_name = 'release-candidate/2.0.0'
             const response = await github.rest.git.deleteRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: `heads/${branch_name}`,
+              ref: `heads/${{ steps.define_branch.outputs.branch_name }}`,
             });
 
             console.log(response)
