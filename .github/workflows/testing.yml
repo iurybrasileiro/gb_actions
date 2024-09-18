@@ -32,7 +32,6 @@ jobs:
       - name: Create pull request
         uses: actions/github-script@v6
         id: create_pull_request
-        id: create_reply
         with:
           script: |
             const branch_name = 'release-candidate/2.0.0'
@@ -56,7 +55,7 @@ jobs:
             const response = await github.rest.pulls.merge({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: ${{ steps.check_comment.outputs.skip_next_steps }},
+              pull_number: ${{ steps.create_pull_request.outputs.pull_request_number }},
             });
 
             console.log(response)
