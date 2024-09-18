@@ -33,11 +33,6 @@ jobs:
           git remote set-url origin https://github.com/iurybrasileiro/gb_actions.git
           git push origin ${{ steps.define_branch.outputs.branch_name }}
 
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ steps.define_branch.outputs.branch_name }}
-          fetch-depth: 0
-
       - name: Create pull request
         uses: actions/github-script@v6
         id: create_pull_request
