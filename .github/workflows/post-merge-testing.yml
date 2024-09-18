@@ -20,12 +20,7 @@ jobs:
       - name: Run action for release-candidate merge
         run: echo "Merged release-candidate into testing"
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-        id: extract_branch
-
-      - run: echo ${{ steps.extract_branch.outputs.branch }}
+      - run: echo ${{ github.ref_name }}
 
   hotfix_merge:
     if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'hotfix/')
@@ -39,9 +34,4 @@ jobs:
       - name: Run action for hotfix merge
         run: echo "Merged hotfix into testing"
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-        id: extract_branch
-
-      - run: echo ${{ steps.extract_branch.outputs.branch }}
+      - run: echo ${{ github.ref_name }}
