@@ -47,7 +47,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `Merge ${{ steps.define_branch.outputs.branch_name }} into testing`,
-              head: ${{ steps.define_branch.outputs.branch_name }},
+              head: `${{ steps.define_branch.outputs.branch_name }}`,
               base: 'testing',
             });
 
