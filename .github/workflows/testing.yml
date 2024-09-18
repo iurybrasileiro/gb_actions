@@ -38,12 +38,11 @@ jobs:
         id: create_pull_request
         with:
           script: |
-            const branch_name = ${{ steps.define_branch.outputs.branch_name }}
             const response = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Merge ${branch_name} into testing`,
-              head: ${branch_name},
+              title: `Merge ${{ steps.define_branch.outputs.branch_name }} into testing`,
+              head: ${{ steps.define_branch.outputs.branch_name }},
               base: 'testing',
             });
 
@@ -67,11 +66,10 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const branch_name = ${{ steps.define_branch.outputs.branch_name }}
             const response = await github.rest.git.deleteRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: `heads/${branch_name}`,
+              ref: `heads/${{ steps.define_branch.outputs.branch_name }}`,
             });
 
             console.log(response)
