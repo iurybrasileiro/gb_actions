@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: github.ref_name
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
 
       - name: Run action for release-candidate merge
@@ -28,7 +28,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: github.ref_name
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
 
       - name: Run action for hotfix merge
