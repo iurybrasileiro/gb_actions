@@ -46,9 +46,9 @@ jobs:
               base: 'testing',
             });
 
-            core.setOutput("pull_request_number", response.data.number);
-
             console.log(response)
+
+            core.setOutput("pull_request_number", response.data.number);
 
       - name: Merge pull request
         uses: actions/github-script@v6
