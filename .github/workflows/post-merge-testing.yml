@@ -1,0 +1,35 @@
+name: Post-Merge Actions on Testing
+
+on:
+  push:
+    branches:
+      - testing
+
+jobs:
+  post_merge_actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Determine if release-candidate or hotfix
+        run: |
+          # Get the latest merge commit
+          MERGE_COMMIT=$(git log -1 --merges --pretty=format:"%H")
+          
+          # Get the branch that was merged into testing
+          MERGED_BRANCH=$(git log -1 --merges --pretty=format:"%P" | cut -d " " -f2)
+          
+          # Check the branch name (assuming it follows release-candidate/* or hotfix/* pattern)
+          BRANCH_NAME=$(git name-rev --name-only $MERGED_BRANCH)
+
+          if [[ "$BRANCH_NAME" == release-candidate/* ]]; then
+            echo "Release candidate merge detected"
+            # Run commands for release-candidate merge
+          elif [[ "$BRANCH_NAME" == hotfix/* ]]; then
+            echo "Hotfix merge detected"
+            # Run commands for hotfix merge
+          else
+            echo "Unknown merge type"
