@@ -14,13 +14,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        ref: github.ref_name
         with:
           fetch-depth: 0
 
       - name: Run action for release-candidate merge
         run: echo "Merged release-candidate into testing"
-
-      - run: echo ${{ github.ref_name }}
 
   hotfix_merge:
     if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'hotfix/')
@@ -28,10 +27,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        ref: github.ref_name
         with:
           fetch-depth: 0
 
       - name: Run action for hotfix merge
         run: echo "Merged hotfix into testing"
-
-      - run: echo ${{ github.ref_name }}
