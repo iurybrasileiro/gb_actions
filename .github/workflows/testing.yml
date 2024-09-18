@@ -35,7 +35,6 @@ jobs:
         with:
           script: |
             const branch_name = 'release-candidate/2.0.0'
-
             const response = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -56,6 +55,19 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: ${{ steps.create_pull_request.outputs.pull_request_number }},
+            });
+
+            console.log(response)
+
+      - name: Delete branch
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const branch_name = 'release-candidate/2.0.0'
+            const response = await github.rest.git.deleteRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `heads/${branch_name}`,
             });
 
             console.log(response)
