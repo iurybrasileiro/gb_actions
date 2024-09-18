@@ -1,0 +1,49 @@
+name: Create release candidate
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create_release_candidate_branch:
+    name: Calculate version
+    runs-on: ubuntu-latest
+    environment: DEV
+    steps:
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.7
+        with:
+          versionSpec: '5.x'
+
+      - uses: actions/checkout@v3
+        with:
+          ref: testing
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v2
+
+      - name: Create release candidate branch
+        run: |
+          git fetch
+          git pull
+          git checkout -b release-candidate/2.0.0
+          git remote set-url origin https://github.com/iurybrasileiro/gb_actions.git
+          git push origin release-candidate/2.0.0
+
+      - name: Create Pull Request to testing
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.MAESTRO_PAT }}
+          base: testing
+          head: release-candidate/2.0.0
+          title: 'Release candidate ${{ steps.gitversion.outputs.releaseVersion }}'
+          body: 'Automated PR for release candidate branch'
+          draft: false
+          auto-merge: true
+
+      # Optionally, merge the PR if required (if auto-merge fails or needs manual)
+      - name: Merge PR
+        run: |
+          PR_NUMBER=$(gh pr list --state open --head release-candidate/2.0.0 --json number --jq '.[0].number')
+          gh pr merge $PR_NUMBER --merge
+        env:
+          GITHUB_TOKEN: ${{ secrets.MAESTRO_PAT }}
