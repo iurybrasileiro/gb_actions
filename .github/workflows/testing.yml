@@ -21,25 +21,29 @@ jobs:
 
       - uses: actions/setup-dotnet@v2
 
+      - name: Define branch name
+        id: define_branch
+        run: echo "branch_name=release-candidate/3.0.0" >> $GITHUB_OUTPUT
+
       - name: Create release candidate branch
         run: |
           git fetch
           git pull
-          git checkout -b release-candidate/2.0.0
-          git remote set-url origin https://github.com/iurybrasileiro/gb_actions.git
-          git push origin release-candidate/2.0.0
+          git checkout -b ${{ steps.define_branch.outputs.branch_name }}
+          git remote set-url origin https://${{ secrets.PAT }}@github.com/fluyoapp/mobile.git/
+          git push origin ${{ steps.define_branch.outputs.branch_name }}
 
       - name: Create pull request
         uses: actions/github-script@v6
         id: create_pull_request
         with:
           script: |
-            const branch_name = 'release-candidate/2.0.0'
+            const branch_name = ${{ steps.define_branch.outputs.branch_name }}
             const response = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `Merge ${branch_name} into testing`,
-              head: 'release-candidate/2.0.0',
+              head: branch_name,
               base: 'testing',
             });
 
@@ -63,7 +67,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const branch_name = 'release-candidate/2.0.0'
+            const branch_name = ${{ steps.define_branch.outputs.branch_name }}
             const response = await github.rest.git.deleteRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
