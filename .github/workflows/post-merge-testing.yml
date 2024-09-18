@@ -1,26 +1,47 @@
-name: Post-Merge Actions on Testing
+name: Branch Merge Workflow
 
 on:
-  push:
+  pull_request:
     branches:
       - testing
+    types:
+      - closed
 
 jobs:
-  post_merge_actions:
+  release_candidate_merge:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release-candidate/')
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-       - name: Determine if release-candidate or hotfix
-          run: |
-            if git describe --tags | grep -q "release-candidate"; then
-              echo "Release candidate merge detected"
-              # Run commands for release-candidate merge
-            elif git describe --tags | grep -q "hotfix"; then
-              echo "Hotfix merge detected"
-              # Run commands for hotfix merge
-            else
-              echo "Unknown merge type"
+      - name: Run action for release-candidate merge
+        run: echo "Merged release-candidate into testing"
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+
+      - run: echo ${{ steps.extract_branch.outputs.branch }}
+
+  hotfix_merge:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'hotfix/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Run action for hotfix merge
+        run: echo "Merged hotfix into testing"
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+
+      - run: echo ${{ steps.extract_branch.outputs.branch }}
