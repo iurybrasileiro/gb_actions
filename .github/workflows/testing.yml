@@ -34,9 +34,12 @@ jobs:
         id: create_reply
         with:
           script: |
+            const branch_name = 'release-candidate/2.0.0'
+
             const response = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
+              title: `Merge ${branch_name} into testing`,
               head: 'release-candidate/2.0.0',
               base: 'testing',
             });
