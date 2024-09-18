@@ -29,21 +29,16 @@ jobs:
           git remote set-url origin https://github.com/iurybrasileiro/gb_actions.git
           git push origin release-candidate/2.0.0
 
-      - name: Create Pull Request to testing
-        uses: peter-evans/create-pull-request@v5
+      - name: Reply 'Running e2e test' message with test result
+        uses: actions/github-script@v6
+        id: create_reply
         with:
-          token: ${{ secrets.MAESTRO_PAT }}
-          base: testing
-          head: release-candidate/2.0.0
-          title: 'Release candidate ${{ steps.gitversion.outputs.releaseVersion }}'
-          body: 'Automated PR for release candidate branch'
-          draft: false
-          auto-merge: true
+          script: |
+            const response = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: 'release-candidate/2.0.0',
+              base: 'testing',
+            });
 
-      # Optionally, merge the PR if required (if auto-merge fails or needs manual)
-      - name: Merge PR
-        run: |
-          PR_NUMBER=$(gh pr list --state open --head release-candidate/2.0.0 --json number --jq '.[0].number')
-          gh pr merge $PR_NUMBER --merge
-        env:
-          GITHUB_TOKEN: ${{ secrets.MAESTRO_PAT }}
+            console.log(response)
