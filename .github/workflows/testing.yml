@@ -29,8 +29,9 @@ jobs:
           git remote set-url origin https://github.com/iurybrasileiro/gb_actions.git
           git push origin release-candidate/2.0.0
 
-      - name: Reply 'Running e2e test' message with test result
+      - name: Create pull request
         uses: actions/github-script@v6
+        id: create_pull_request
         id: create_reply
         with:
           script: |
@@ -42,6 +43,20 @@ jobs:
               title: `Merge ${branch_name} into testing`,
               head: 'release-candidate/2.0.0',
               base: 'testing',
+            });
+
+            core.setOutput("pull_request_number", response.data.number);
+
+            console.log(response)
+
+      - name: Merge pull request
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const response = await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ steps.check_comment.outputs.skip_next_steps }},
             });
 
             console.log(response)
