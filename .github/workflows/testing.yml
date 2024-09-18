@@ -43,7 +43,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `Merge ${branch_name} into testing`,
-              head: branch_name,
+              head: ${branch_name},
               base: 'testing',
             });
 
