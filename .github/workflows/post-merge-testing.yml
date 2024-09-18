@@ -21,6 +21,9 @@ jobs:
       - name: Run action for release-candidate merge
         run: echo "Merged release-candidate into testing"
 
+      - name: Display git log
+        run: git log
+
   hotfix_merge:
     if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'hotfix/')
     runs-on: ubuntu-latest
@@ -33,3 +36,6 @@ jobs:
 
       - name: Run action for hotfix merge
         run: echo "Merged hotfix into testing"
+
+      - name: Display git log
+        run: git log
