@@ -1,5 +1,5 @@
 const main = () => {
-  console.log('8')
+  console.log('9')
 }
 
 main()
