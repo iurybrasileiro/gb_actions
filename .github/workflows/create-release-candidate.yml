@@ -72,3 +72,19 @@ jobs:
             });
 
             console.log(response)
+
+      - name: Trigger deploy release candidate
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const workflow_id = 'deploy-release-candidate.yml'
+            const ref = 'heads/testing'
+
+            const response = await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id',
+              ref,
+            });
+
+            console.log(response)
