@@ -1,0 +1,22 @@
+name: Run Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Build and run tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Print head ref
+        run: echo ${{ github.head_ref }}
+
+      - name: Print ref name
+        run: echo ${{ github.ref_name }}
