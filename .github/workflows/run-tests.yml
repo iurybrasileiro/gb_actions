@@ -51,8 +51,6 @@ jobs:
                 pull_number: pull_number,
               });
 
-              # const commentsReplies = reviewComments.data.filter(reply => reply.in_reply_to_id == hasRunningTestComment.id)
-
               console.log(JSON.stringify(reviewComments))
               core.setOutput("skip_next_steps", true);
               return
