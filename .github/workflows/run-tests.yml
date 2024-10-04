@@ -50,6 +50,8 @@ jobs:
                 review_id: hasRunningTestComment.id,
               });
 
+              console.log(JSON.stringify(hasRunningTestComment))
+
               const replies = repliesResponse.data;
 
               if (replies.length == 0) {
@@ -58,7 +60,7 @@ jobs:
                 return
               }
 
-              console.log(JSON.stringify(replies))
+              console.log(JSON.stringify(repliesResponse))
             
               const shouldRunAgain = replies.find(reply => reply.body.includes("[SKIP MESSAGE]"))
               if (shouldRunAgain) {
