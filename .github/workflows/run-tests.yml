@@ -49,8 +49,17 @@ jobs:
 
               const replies = repliesResponse.data;
 
-              if (replies.length < 2) {
+              if (replies.length == 0) {
+                console.log('No replies found');
                 core.setOutput("skip_next_steps", true);
+                return
+              }
+
+              console.log(JSON.stringify(replies))
+            
+              const shouldRunAgain = replies.find(reply => reply.body.includes("[SKIP MESSAGE]"))
+              if (shouldRunAgain) {
+                core.setOutput("skip_next_steps", false);
                 return
               }
 
@@ -58,6 +67,7 @@ jobs:
               const iosComment = replies.find(reply => reply.body.includes("IOS"))
 
               if (!androidComment || !iosComment) {
+                console.log('Android or iOS reply not found');
                 core.setOutput("skip_next_steps", true);
                 return
               }
@@ -65,14 +75,17 @@ jobs:
               const isAllTestsPassed = replies.every(reply => reply.body.includes('PASSED'))
 
               if (isAllTestsPassed) {
+                console.log('Android and iOS tests passed');
                 core.setOutput("skip_next_steps", true);
                 return
               }
 
+              console.log('One or more tests failed for Android or iOS');
               core.setOutput("skip_next_steps", false);
               return
             }
 
+            console.log('Running e2e test comment not found');
             core.setOutput("skip_next_steps", false);
 
       - name: Output
