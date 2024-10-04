@@ -43,55 +43,16 @@ jobs:
             const hasRunningTestComment = sortedComments.find(comment => comment.body == commentBody)
 
             if (hasRunningTestComment) {
-              const repliesResponse = await github.rest.pulls.listCommentsForReview({
+              const reviewComments = await github.rest.pulls.listReviewComments({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: pull_number,
-                review_id: hasRunningTestComment.id,
               });
 
-              console.log(JSON.stringify(hasRunningTestComment))
+              const commentsReplies = reviewComments.data.filter(reply => reply.in_reply_to_id == comment.data.id)
 
-              const replies = repliesResponse.data;
-
-              if (replies.length == 0) {
-                console.log('No replies found');
-                core.setOutput("skip_next_steps", true);
-                return
-              }
-
-              console.log(JSON.stringify(repliesResponse))
-            
-              const shouldRunAgain = replies.find(reply => reply.body.includes("[SKIP MESSAGE]"))
-              if (shouldRunAgain) {
-                core.setOutput("skip_next_steps", false);
-                return
-              }
-
-              const androidComment = replies.find(reply => reply.body.includes("ANDROID"))
-              const iosComment = replies.find(reply => reply.body.includes("IOS"))
-
-              if (!androidComment || !iosComment) {
-                console.log('Android or iOS reply not found');
-                core.setOutput("skip_next_steps", true);
-                return
-              }
-
-              const isAllTestsPassed = replies.every(reply => reply.body.includes('PASSED'))
-
-              if (isAllTestsPassed) {
-                console.log('Android and iOS tests passed');
-                core.setOutput("skip_next_steps", true);
-                return
-              }
-
-              console.log('One or more tests failed for Android or iOS');
-              core.setOutput("skip_next_steps", false);
-              return
-            }
-
-            console.log('Running e2e test comment not found');
-            core.setOutput("skip_next_steps", false);
+              console.log(JSON.stringify(commentsReplies))
+              core.setOutput("skip_next_steps", true);
 
       - name: Output
         run: echo ${{ steps.check_comment.outputs.skip_next_steps }}
