@@ -53,6 +53,10 @@ jobs:
 
               console.log(JSON.stringify(commentsReplies))
               core.setOutput("skip_next_steps", true);
+              return
+            }
+
+            core.setOutput("skip_next_steps", true);
 
       - name: Output
         run: echo ${{ steps.check_comment.outputs.skip_next_steps }}
