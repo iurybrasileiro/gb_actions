@@ -42,8 +42,6 @@ jobs:
 
             const hasRunningTestComment = sortedComments.find(comment => comment.body == commentBody)
 
-            console.log(JSON.stringify(hasRunningTestComment))
-
             if (hasRunningTestComment) {
               const reviewComments = await github.rest.pulls.listReviewComments({
                 owner: context.repo.owner,
@@ -51,7 +49,7 @@ jobs:
                 pull_number: pull_number,
               });
 
-              console.log(JSON.stringify(reviewComments))
+              console.log(JSON.stringify(reviewComments.data))
               core.setOutput("skip_next_steps", true);
               return
             }
