@@ -103,7 +103,7 @@ jobs:
       - name: Create 'Running e2e test' review comment
         uses: actions/github-script@v6
         id: create_review_comment
-        if: false
+        if: true
         with:
           script: |
             const pull_number = context.issue.number;
