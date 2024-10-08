@@ -166,7 +166,7 @@ jobs:
 
       - name: Add comment ID to build success hook file
         if: steps.check_comment.outputs.skip_next_steps == 'false'
-        run: sed -i "3s/^/COMMENT_ID=${{ steps.create_review_comment.outputs.comment_id }}\n/" scripts/eas-build-on-success.sh
+        run: sed -i "3s|^|COMMENT_ID=${{ steps.create_review_comment.outputs.comment_id }}\n|" scripts/eas-build-on-success.sh
 
       - name: Add branch name to build success hook file
         if: steps.check_comment.outputs.skip_next_steps == 'false'
@@ -174,7 +174,7 @@ jobs:
 
       - name: Add Pull request number in build success hook file
         if: steps.check_comment.outputs.skip_next_steps == 'false'
-        run: sed -i "5s/^/PULL_REQUEST_ID=${{ steps.get_pr_number_and_branch_name.outputs.pr_number }}\n/" scripts/eas-build-on-success.sh
+        run: sed -i "5s|^|PULL_REQUEST_ID=${{ steps.get_pr_number_and_branch_name.outputs.pr_number }}\n|" scripts/eas-build-on-success.sh
 
       - name: Show eas-build-on-success.sh content
         if: steps.check_comment.outputs.skip_next_steps == 'false'
