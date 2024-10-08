@@ -151,18 +151,10 @@ jobs:
         if: steps.check_comment.outputs.skip_next_steps == 'false'
         run: sed -i "3s/^/COMMENT_ID=${{ steps.create_review_comment.outputs.comment_id }}\n/" scripts/eas-build-on-success.sh
 
-      - name: Get pull request number
+      - name: Get PR number and branch name
         uses: actions/github-script@v6
         if: steps.check_comment.outputs.skip_next_steps == 'false'
-        id: get_pull_request_number
-        with:
-          script: |
-            core.setOutput("number", context.issue.number);
-
-      - name: Get branch name
-        uses: actions/github-script@v6
-        if: steps.check_comment.outputs.skip_next_steps == 'false'
-        id: get_branch_name
+        id: get_pr_number_and_branch_name
         with:
           script: |
             const pull_number = context.issue.number;
@@ -173,15 +165,16 @@ jobs:
               pull_number: pull_number,
             });
 
-            console.log(JSON.stringify(pullRequestData))
+            core.setOutput("pr_number", pull_number);
+            core.setOutput("branch_name", pullRequestData.data.head.ref);
 
       - name: Add branch name to build success hook file
         if: steps.check_comment.outputs.skip_next_steps == 'false'
-        run: sed -i "4s/^/BRANCH_NAME=${{ steps.get_pull_request_number.outputs.number }}\n/" scripts/eas-build-on-success.sh
+        run: sed -i "4s/^/BRANCH_NAME=${{ steps.get_pr_number_and_branch_name.outputs.branch_name }}\n/" scripts/eas-build-on-success.sh
 
       - name: Add Pull request number in build success hook file
         if: steps.check_comment.outputs.skip_next_steps == 'false'
-        run: sed -i "5s/^/PULL_REQUEST_ID=${{ steps.get_pull_request_number.outputs.number }}\n/" scripts/eas-build-on-success.sh
+        run: sed -i "5s/^/PULL_REQUEST_ID=${{ steps.get_pr_number_and_branch_name.outputs.pr_number }}\n/" scripts/eas-build-on-success.sh
 
       - name: Show eas-build-on-success.sh content
         if: steps.check_comment.outputs.skip_next_steps == 'false'
