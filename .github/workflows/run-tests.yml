@@ -1,15 +1,14 @@
 name: Run Tests
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
+  pull_request_review:
+    types: [submitted]
     branches:
       - main
 
 jobs:
-  deploy:
+  run_tests:
+    if: github.event.review.state == 'APPROVED'
     name: Build and run tests
     runs-on: ubuntu-latest
     permissions:
@@ -101,13 +100,6 @@ jobs:
             console.log('Running e2e test comment not found');
             core.setOutput("skip_next_steps", false);
 
-      - name: Output
-        run: echo ${{ steps.check_comment.outputs.skip_next_steps }}
-
-      - name: Add PR number in build success hook file
-        if: github.event_name == 'pull_request' && steps.check_comment.outputs.skip_next_steps == 'false'
-        run: sed -i "2s/^/PULL_REQUEST_ID=${{ github.event.number }}\n/" scripts/eas-build-on-success.sh
-
       - name: Create 'Running e2e test' review comment
         uses: actions/github-script@v6
         id: create_review_comment
@@ -159,16 +151,14 @@ jobs:
         if: steps.check_comment.outputs.skip_next_steps == 'false'
         run: sed -i "3s/^/COMMENT_ID=${{ steps.create_review_comment.outputs.comment_id }}\n/" scripts/eas-build-on-success.sh
 
-      - name: Extract branch name
-        shell: bash
-        id: extract_branch
-        if: steps.check_comment.outputs.skip_next_steps == 'false'
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-
       - name: Add branch name to build success hook file
         if: steps.check_comment.outputs.skip_next_steps == 'false'
-        run: sed -i "4s/^/BRANCH=${{ steps.extract_branch.outputs.branch }}\n/" scripts/eas-build-on-success.sh
+        run: sed -i "4s/^/BRANCH_NAME=${{ github.head_ref }}\n/" scripts/eas-build-on-success.sh
 
-      - name: Cat scripts/eas-build-on-success.sh
+      - name: Add Pull request number in build success hook file
+        if: steps.check_comment.outputs.skip_next_steps == 'false'
+        run: sed -i "5s/^/PULL_REQUEST_ID=${{ github.event.number }}\n/" scripts/eas-build-on-success.sh
+
+      - name: Show eas-build-on-success.sh content
         if: steps.check_comment.outputs.skip_next_steps == 'false'
         run: cat scripts/eas-build-on-success.sh
