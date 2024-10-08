@@ -103,7 +103,7 @@ jobs:
       - name: Create 'Running e2e test' review comment
         uses: actions/github-script@v6
         id: create_review_comment
-        if: steps.check_comment.outputs.skip_next_steps == 'false'
+        if: true
         with:
           script: |
             const pull_number = context.issue.number;
@@ -151,13 +151,21 @@ jobs:
         if: steps.check_comment.outputs.skip_next_steps == 'false'
         run: sed -i "3s/^/COMMENT_ID=${{ steps.create_review_comment.outputs.comment_id }}\n/" scripts/eas-build-on-success.sh
 
+      - name: Get pull request number
+        uses: actions/github-script@v6
+        if: steps.check_comment.outputs.skip_next_steps == 'false'
+        id: get_pull_request_number
+        with:
+          script: |
+            core.setOutput("number", context.issue.number);
+
       - name: Add branch name to build success hook file
         if: steps.check_comment.outputs.skip_next_steps == 'false'
         run: sed -i "4s/^/BRANCH_NAME=${{ github.head_ref }}\n/" scripts/eas-build-on-success.sh
 
       - name: Add Pull request number in build success hook file
         if: steps.check_comment.outputs.skip_next_steps == 'false'
-        run: sed -i "5s/^/PULL_REQUEST_ID=${{ github.event.number }}\n/" scripts/eas-build-on-success.sh
+        run: sed -i "5s/^/PULL_REQUEST_ID=${{ steps.get_pull_request_number.outputs.number }}\n/" scripts/eas-build-on-success.sh
 
       - name: Show eas-build-on-success.sh content
         if: steps.check_comment.outputs.skip_next_steps == 'false'
