@@ -78,12 +78,12 @@ jobs:
         with:
           script: |
             const workflow_id = 'deploy-release-candidate.yml'
-            const ref = 'heads/testing'
+            const ref = 'testing'
 
             const response = await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id',
+              workflow_id,
               ref,
             });
 
