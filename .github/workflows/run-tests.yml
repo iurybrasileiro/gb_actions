@@ -159,9 +159,17 @@ jobs:
           script: |
             core.setOutput("number", context.issue.number);
 
+      - name: Get branch name
+        uses: actions/github-script@v6
+        if: steps.check_comment.outputs.skip_next_steps == 'false'
+        id: get_branch_name
+        with:
+          script: |
+            core.setOutput("name", context.ref);
+
       - name: Add branch name to build success hook file
         if: steps.check_comment.outputs.skip_next_steps == 'false'
-        run: sed -i "4s/^/BRANCH_NAME=${{ github.head_ref }}\n/" scripts/eas-build-on-success.sh
+        run: sed -i "4s/^/BRANCH_NAME=${{ steps.get_branch_name.outputs.name }}\n/" scripts/eas-build-on-success.sh
 
       - name: Add Pull request number in build success hook file
         if: steps.check_comment.outputs.skip_next_steps == 'false'
