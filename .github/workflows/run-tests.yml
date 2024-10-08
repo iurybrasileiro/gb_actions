@@ -165,11 +165,19 @@ jobs:
         id: get_branch_name
         with:
           script: |
-            core.setOutput("name", context.ref);
+            const pull_number = context.issue.number;
+
+            const pullRequestData = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pull_number,
+            });
+
+            console.log(JSON.stringify(pullRequestData))
 
       - name: Add branch name to build success hook file
         if: steps.check_comment.outputs.skip_next_steps == 'false'
-        run: sed -i "4s/^/BRANCH_NAME=${{ steps.get_branch_name.outputs.name }}\n/" scripts/eas-build-on-success.sh
+        run: sed -i "4s/^/BRANCH_NAME=${{ steps.get_pull_request_number.outputs.number }}\n/" scripts/eas-build-on-success.sh
 
       - name: Add Pull request number in build success hook file
         if: steps.check_comment.outputs.skip_next_steps == 'false'
