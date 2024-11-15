@@ -27,4 +27,8 @@ jobs:
               pull_number: ${{ github.event.number }},
             });
 
-            console.log(response)
+            const changelogFile = response.data.find(file => file.filename === 'CHANGELOG.md');
+
+            if (!changelogFile) {
+              core.setFailed('CHANGELOG.md not found');
+            }
