@@ -1,0 +1,34 @@
+name: Run checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  run_checks:
+    name: Run checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Create pull request
+        uses: actions/github-script@v6
+        id: create_pull_request
+        with:
+          script: |
+            const response = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ github.event.number }},
+            });
+
+            const changelogFile = response.data.find(file => file.filename === 'CHANGELOG.md');
+
+            if (!changelogFile) {
+              core.setFailed('CHANGELOG.md not found');
+            }
